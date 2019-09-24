@@ -49,7 +49,7 @@ publishing {
 }
 
 dependencies {
-    implementation 'net.shrimpworks:unreal-package-lib:1.4.45'
+    implementation 'net.shrimpworks:unreal-package-lib:1.4.46'
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.4.2'
 }

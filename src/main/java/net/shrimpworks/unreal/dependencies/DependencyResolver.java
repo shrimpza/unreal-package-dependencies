@@ -18,6 +18,7 @@ import net.shrimpworks.unreal.packages.entities.Import;
 
 public class DependencyResolver {
 
+	// known file types of unreal packages
 	private static final Set<String> FILE_TYPES = Set.of("u", "unr", "utx", "uax", "umx");
 
 	public final Path rootPath;
@@ -46,20 +47,49 @@ public class DependencyResolver {
 		knownPackages.forEach((k, v) -> lowerNames.put(k.toLowerCase(), v));
 	}
 
+	/**
+	 * Find a package by it's name - excluding file extensions (case
+	 * insensitive).
+	 *
+	 * @param pkgName package to find
+	 * @return found package
+	 * @throws NoSuchElementException the package could not be found
+	 */
 	public UnrealPackage findPackage(String pkgName) {
 		return lowerNames.get(pkgName.toLowerCase()).stream().findFirst()
 						 .orElseThrow(() -> new NoSuchElementException("Could not find package with name " + pkgName));
 	}
 
+	/**
+	 * Find a package by file name.
+	 *
+	 * @param path path to package file
+	 * @return found package
+	 * @throws NoSuchElementException the package could not be found
+	 */
 	public UnrealPackage findPackage(Path path) {
 		return knownPackages.values().stream().flatMap(Set::stream).filter(p -> p.path.equals(path)).findFirst()
 							.orElseThrow(() -> new NoSuchElementException("Could not find package for path " + path.toString()));
 	}
 
+	/**
+	 * Resolve a packages dependencies.
+	 * <p>
+	 * Also see {@link #findPackage(String)}.
+	 *
+	 * @param pkgName name of the package to resolve dependencies for.
+	 * @return resolution result
+	 */
 	public Map<String, Set<Resolved>> resolve(String pkgName) {
 		return resolve(findPackage(pkgName));
 	}
 
+	/**
+	 * Resolve a packages dependencies.
+	 *
+	 * @param unrealPackage package to resolve dependencies for
+	 * @return resolution result
+	 */
 	public Map<String, Set<Resolved>> resolve(UnrealPackage unrealPackage) {
 		Map<String, Set<Resolved>> importPackages = new HashMap<>();
 		for (Import rootImport : unrealPackage.pkg.packageImports()) {
@@ -94,6 +124,8 @@ public class DependencyResolver {
 
 		return importPackages;
 	}
+
+	// --- private helpers
 
 	private Resolved resolve(Import anImport, Export anExport) {
 		Set<Resolved> children = new HashSet<>();

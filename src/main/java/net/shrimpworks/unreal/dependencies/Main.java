@@ -23,6 +23,8 @@ public class Main {
 		ALL
 	}
 
+	private static final String PAD_SIZE = "  ";
+
 	private static final String ANSI_RED = "\u001B[31m";
 	private static final String ANSI_GREEN = "\u001B[32m";
 	private static final String ANSI_RESET = "\u001B[0m";
@@ -51,21 +53,33 @@ public class Main {
 		NativePackages nativePackages = new NativePackages();
 		DependencyResolver resolver = new DependencyResolver(searchPath, nativePackages);
 
-//		System.out.println(prettyPrintImports(resolver.findPackage("CTF-Coret").pkg.packageImports(), ""));
+		while (true) {
+			for (int i = 1; i < cli.args().length; i++) {
+				UnrealPackage pkg;
 
-		for (int i = 1; i < cli.args().length; i++) {
-			UnrealPackage pkg;
+				Path p = Paths.get(cli.args()[i]).toAbsolutePath();
+				if (Files.exists(p)) pkg = resolver.findPackage(p);
+				else pkg = resolver.findPackage(cli.args()[i]);
 
-			Path p = Paths.get(cli.args()[i]).toAbsolutePath();
-			if (Files.exists(p)) pkg = resolver.findPackage(p);
-			else pkg = resolver.findPackage(cli.args()[i]);
+				Map<String, Set<Resolved>> resolved = resolver.resolve(pkg);
+				printResolved(resolver, pkg, resolved, verbosity, System.out);
+			}
 
-			Map<String, Set<Resolved>> resolved = resolver.resolve(pkg);
-			printResolved(resolver, pkg, resolved, verbosity, System.out);
 		}
-
 	}
 
+	// --- private helpers
+
+	/**
+	 * Prints the results of a dependency resolution check, with varying levels
+	 * of output depending on the specified {@link Verbosity}.
+	 *
+	 * @param resolver  dependency resolver instance
+	 * @param pkg       the package which was checked
+	 * @param resolved  resolution output from {@link DependencyResolver#resolve(UnrealPackage)}
+	 * @param verbosity amount of information to output, see {@link Verbosity}
+	 * @param out       output stream to write to
+	 */
 	private static void printResolved(DependencyResolver resolver, UnrealPackage pkg, Map<String, Set<Resolved>> resolved,
 									  Verbosity verbosity, PrintStream out) {
 		String fileResolved = resolved.values().stream().flatMap(Set::stream).allMatch(Resolved::resolved)
@@ -76,15 +90,55 @@ public class Main {
 				boolean pkgResolved = !v.isEmpty() && v.stream().allMatch(Resolved::resolved);
 				if ((verbosity == Verbosity.PACKAGES || verbosity == Verbosity.ALL) ||
 					(!pkgResolved && (verbosity == Verbosity.MISSING_PACKAGES || verbosity == Verbosity.MISSING_DETAIL))) {
-					out.printf("%s   %s%n", pkgResolved ? OK : BAD, k);
+					out.printf("%s %s%s%n", pkgResolved ? OK : BAD, PAD_SIZE, k);
 					if (verbosity == Verbosity.ALL || (!pkgResolved && verbosity == Verbosity.MISSING_DETAIL)) {
-						out.print(prettyResolved(v, verbosity == Verbosity.MISSING_DETAIL, "    "));
+						out.print(prettyResolved(v, verbosity == Verbosity.MISSING_DETAIL, String.format("%s%s", PAD_SIZE, PAD_SIZE)));
 					}
 				}
 			});
 		}
 	}
 
+	/**
+	 * Print a resolved elements tree.
+	 *
+	 * @param resolved    package import resolution result
+	 * @param missingOnly only show elements which are missing
+	 * @param padded      depth of padding of the tree
+	 * @return a printable string
+	 */
+	private static String prettyResolved(Set<Resolved> resolved, boolean missingOnly, String padded) {
+		StringBuilder sb = new StringBuilder();
+		resolved.stream().sorted(Comparator.comparing(r -> r.imported.name)).forEach(r -> {
+			String childPad = String.format("%s%s", PAD_SIZE, padded);
+			boolean parentResolved = r.resolved();
+			if (!missingOnly || !parentResolved) {
+				sb.append(String.format("%s %s%s: %s%n", parentResolved ? OK : BAD,
+										padded, r.imported.name().name, r.imported.className.name));
+			}
+
+			r.children.stream().sorted(Comparator.comparing(child -> child.imported.name)).forEach(child -> {
+				boolean childResolved = r.resolved();
+				if (!missingOnly || !childResolved) {
+					sb.append(String.format("%s %s%s: %s%n", childResolved ? OK : BAD,
+											childPad, child.imported.name.name, child.imported.className.name));
+
+					Set<Resolved> subChildren = child.children;
+					if (!subChildren.isEmpty()) {
+						sb.append(prettyResolved(subChildren, missingOnly, String.format("%s%s", PAD_SIZE, childPad)));
+					}
+				}
+			});
+		});
+
+		return sb.toString();
+	}
+
+	/**
+	 * Utility to print a package's export tree.
+	 *
+	 * @return printable string
+	 */
 	private static String prettyPrintExports(Collection<Export> exports, String padded) {
 		StringBuilder sb = new StringBuilder();
 		exports.stream().sorted(Comparator.comparing(Export::name)).forEach(e -> {
@@ -101,6 +155,11 @@ public class Main {
 		return sb.toString();
 	}
 
+	/**
+	 * Utility to print a package's import tree.
+	 *
+	 * @return printable string
+	 */
 	private static String prettyPrintImports(Collection<Import> imports, String padded) {
 		StringBuilder sb = new StringBuilder();
 		imports.stream().sorted(Comparator.comparing(Import::name)).forEach(i -> {
@@ -114,33 +173,6 @@ public class Main {
 				}
 			});
 		});
-		return sb.toString();
-	}
-
-	private static String prettyResolved(Set<Resolved> resolved, boolean missingOnly, String padded) {
-		StringBuilder sb = new StringBuilder();
-		resolved.stream().sorted(Comparator.comparing(r -> r.imported.name)).forEach(r -> {
-			String childPad = String.format("  %s", padded);
-			boolean parentResolved = r.resolved();
-			if (!missingOnly || !parentResolved) {
-				sb.append(String.format("%s %s%s: %s%n", parentResolved ? OK : BAD,
-										padded, r.imported.name().name, r.imported.className.name));
-			}
-
-			r.children.stream().sorted(Comparator.comparing(child -> child.imported.name)).forEach(child -> {
-				boolean childResolved = r.resolved();
-				if (!missingOnly || !childResolved) {
-					sb.append(String.format("%s %s%s: %s%n", childResolved ? OK : BAD,
-											childPad, child.imported.name.name, child.imported.className.name));
-
-					Set<Resolved> subChildren = child.children;
-					if (!subChildren.isEmpty()) {
-						sb.append(prettyResolved(subChildren, missingOnly, String.format("  %s", childPad)));
-					}
-				}
-			});
-		});
-
 		return sb.toString();
 	}
 

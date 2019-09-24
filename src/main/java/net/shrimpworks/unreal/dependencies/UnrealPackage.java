@@ -22,4 +22,9 @@ public class UnrealPackage {
 		tmp = tmp.substring(Math.max(0, tmp.lastIndexOf("/") + 1));
 		return tmp.substring(0, tmp.lastIndexOf(".")).replaceAll("/", "").trim().replaceAll("[^\\x20-\\x7E]", "");
 	}
+
+	@Override
+	public String toString() {
+		return String.format("UnrealPackage [path=%s, name=%s, pkg=%s]", path, name, pkg);
+	}
 }

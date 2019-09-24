@@ -9,6 +9,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Manages a collection of native package contents which are exported from DLLs
+ * not exposed via the related Unreal package.
+ * <p>
+ * Maintaining a collection of native exports allows us to resolve imports
+ * which cannot be matched to package exports.
+ */
 public class NativePackages {
 
 	private static final String[] PACKAGES = {
@@ -24,13 +31,19 @@ public class NativePackages {
 		}
 	}
 
+	/**
+	 * Find a native package.
+	 *
+	 * @param name package name, case insensitive
+	 * @return a native package for the name requested, or <code>null</code> if not found
+	 */
 	public NativePackage get(String name) {
 		return packages.get(name.toLowerCase());
 	}
 
 	@Override
 	public String toString() {
-		return String.format("NativePackages [packages=%s]", packages);
+		return String.format("NativePackages [packages=%s]", packages.values());
 	}
 
 	public static class NativePackage {
@@ -47,6 +60,12 @@ public class NativePackages {
 			this.classes = classes;
 		}
 
+		/**
+		 * Check whether this native package exports a class with the name provided.
+		 *
+		 * @param className class name, case insensitive
+		 * @return true of this package exports the class
+		 */
 		public boolean contains(String className) {
 			return classes.contains(className.toLowerCase());
 		}
