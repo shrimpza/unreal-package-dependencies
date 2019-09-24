@@ -21,4 +21,4 @@ jobs:
           CI_BUILD: release
         run: |
           ./gradlew publish execJar
-          ./etc/publish.sh https://code.shrimpworks.za.net/artefacts/package-dependnecy ./build/libs/package-dependnecy ./build/libs/package-dependnecy-exec.jar
+          ./etc/publish.sh https://code.shrimpworks.za.net/artefacts/package-dependency ./build/libs/package-dependency ./build/libs/package-dependency-exec.jar
