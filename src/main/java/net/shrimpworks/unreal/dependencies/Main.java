@@ -53,6 +53,7 @@ public class Main {
 		NativePackages nativePackages = new NativePackages();
 		DependencyResolver resolver = new DependencyResolver(searchPath, nativePackages);
 
+		boolean ok = true;
 		for (int i = 1; i < cli.args().length; i++) {
 			UnrealPackage pkg;
 
@@ -62,7 +63,13 @@ public class Main {
 
 			Map<String, Set<Resolved>> resolved = resolver.resolve(pkg);
 			printResolved(resolver, pkg, resolved, verbosity, System.out);
+
+			ok = ok && resolved.values().stream().flatMap(Set::stream).allMatch(Resolved::resolved)
+				 && resolved.entrySet().stream().noneMatch(e -> e.getValue().isEmpty());
 		}
+
+		// if there are any unresolved packages or files, return exit code 1
+		if (!ok) System.exit(1);
 	}
 
 	// --- private helpers

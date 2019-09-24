@@ -14,7 +14,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DependencyResolverTest {
@@ -49,6 +50,7 @@ public class DependencyResolverTest {
 	public void resolveDependencies() throws IOException {
 		DependencyResolver resolver = new DependencyResolver(unrMap.getParent(), new NativePackages());
 		Map<String, Set<Resolved>> resolve = resolver.resolve("SCR-CityStreet");
-		assertTrue(resolve.get("SoccerScores").isEmpty());
+		assertFalse(resolve.get("SoccerScores").isEmpty());
+		assertFalse(resolve.get("SoccerScores").stream().allMatch(Resolved::resolved));
 	}
 }

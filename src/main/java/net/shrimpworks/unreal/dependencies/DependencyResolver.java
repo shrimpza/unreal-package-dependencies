@@ -94,32 +94,33 @@ public class DependencyResolver {
 		Map<String, Set<Resolved>> importPackages = new HashMap<>();
 		for (Import rootImport : unrealPackage.pkg.packageImports()) {
 			Set<UnrealPackage> candidatePackages = lowerNames.getOrDefault(rootImport.name.name.toLowerCase(), Collections.emptySet());
-			if (candidatePackages.isEmpty()) {
-				importPackages.put(rootImport.name.name, Collections.emptySet());
-			} else {
-				Set<Resolved> candidates = new HashSet<>();
-				for (Import i : rootImport.children()) {
-					for (UnrealPackage pkg : candidatePackages) {
-						Export match = pkg.pkg.rootExports().stream()
-											  .filter(e -> e.name.name.equalsIgnoreCase(i.name.name))
-											  .findFirst().orElse(null);
-						if (match != null) {
-							Resolved candidate = resolve(i, match);
-							candidates.add(candidate);
-						} else {
-							// no regular exports found, maybe we can find a native export
-							NativePackages.NativePackage nativePackage = nativePackages.get(rootImport.name.name);
-							if (nativePackage != null && nativePackage.contains(i.name.name)) {
-								candidates.add(new Resolved(i, Resolved.ResolvedTarget.nativeClass(nativePackage.name, i.name.name),
-															Collections.emptySet()));
-							} else {
-								candidates.add(new Resolved(i, null, Collections.emptySet()));
-							}
-						}
-					}
+			Set<Resolved> candidates = new HashSet<>();
+			for (Import i : rootImport.children()) {
+				// required package is missing completely
+				if (candidatePackages.isEmpty()) candidates.add(resolve(i, null));
+
+				for (UnrealPackage pkg : candidatePackages) {
+					pkg.pkg.rootExports().stream()
+						   .filter(e -> e.name.name.equalsIgnoreCase(i.name.name))
+						   .sorted((a, b) -> a.children().isEmpty() ? 1 : -1) // prefer exports with children, they have stuff to import
+						   .findFirst()
+						   .ifPresentOrElse(
+								   found -> candidates.add(resolve(i, found)),
+								   () -> {
+									   // no regular exports found, maybe we can find a native export
+									   NativePackages.NativePackage nativePackage = nativePackages.get(rootImport.name.name);
+									   if (nativePackage != null && nativePackage.contains(i.name.name)) {
+										   candidates.add(new Resolved(i, Resolved.ResolvedTarget.nativeClass(nativePackage.name,
+																											  i.name.name),
+																	   Collections.emptySet()));
+									   } else {
+										   // we didn't find a sub-package or export we were looking for, so add the rest of the imports
+										   candidates.add(resolve(i, null));
+									   }
+								   });
 				}
-				importPackages.put(rootImport.name.name, candidates);
 			}
+			importPackages.put(rootImport.name.name, candidates);
 		}
 
 		return importPackages;
@@ -130,14 +131,19 @@ public class DependencyResolver {
 	private Resolved resolve(Import anImport, Export anExport) {
 		Set<Resolved> children = new HashSet<>();
 		for (Import i : anImport.children()) {
-			for (Export e : anExport.children()) {
-				if (e.name.equals(i.name)) {
-					children.add(resolve(i, e));
-					break;
+			Resolved found = null;
+			if (anExport != null) {
+				for (Export e : anExport.children()) {
+					if (e.name.name.equalsIgnoreCase(i.name.name)) {
+						found = resolve(i, e);
+						break;
+					}
 				}
 			}
+			if (found == null) found = resolve(i, null);
+			children.add(found);
 		}
-		return new Resolved(anImport, Resolved.ResolvedTarget.export(anExport), children);
+		return new Resolved(anImport, anExport == null ? null : Resolved.ResolvedTarget.export(anExport), children);
 	}
 
 	private static String extension(Path path) {
