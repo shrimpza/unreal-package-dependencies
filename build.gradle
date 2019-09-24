@@ -8,16 +8,12 @@ plugins {
 }
 
 group = 'net.shrimpworks'
-version = "1.0"
+version = "1.0.1"
 
 mainClassName = 'net.shrimpworks.unreal.dependencies.Main'
 
 sourceCompatibility = '11'
 targetCompatibility = '11'
-
-if (System.getenv().containsKey("TRAVIS_BUILD_NUMBER")) {
-    version = "${version}.${System.env.TRAVIS_BUILD_NUMBER}"
-}
 
 repositories {
     mavenLocal()
