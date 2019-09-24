@@ -14,8 +14,11 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Publish with Gradle
+      - name: Publish Artefacts
         env:
           ARTEFACTS_USER: ${{ secrets.ARTEFACTS_USER }}
           ARTEFACTS_PASSWORD: ${{ secrets.ARTEFACTS_PASSWORD }}
-        run: ./gradlew publish
+          CI_BUILD: release
+        run: |
+          ./gradlew publish execJar
+          ./etc/publish.sh https://code.shrimpworks.za.net/artefacts/package-dependnecy ./build/libs/package-dependnecy ./build/libs/package-dependnecy-exec.jar
