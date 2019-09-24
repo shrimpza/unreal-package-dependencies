@@ -53,18 +53,15 @@ public class Main {
 		NativePackages nativePackages = new NativePackages();
 		DependencyResolver resolver = new DependencyResolver(searchPath, nativePackages);
 
-		while (true) {
-			for (int i = 1; i < cli.args().length; i++) {
-				UnrealPackage pkg;
+		for (int i = 1; i < cli.args().length; i++) {
+			UnrealPackage pkg;
 
-				Path p = Paths.get(cli.args()[i]).toAbsolutePath();
-				if (Files.exists(p)) pkg = resolver.findPackage(p);
-				else pkg = resolver.findPackage(cli.args()[i]);
+			Path p = Paths.get(cli.args()[i]).toAbsolutePath();
+			if (Files.exists(p)) pkg = resolver.findPackage(p);
+			else pkg = resolver.findPackage(cli.args()[i]);
 
-				Map<String, Set<Resolved>> resolved = resolver.resolve(pkg);
-				printResolved(resolver, pkg, resolved, verbosity, System.out);
-			}
-
+			Map<String, Set<Resolved>> resolved = resolver.resolve(pkg);
+			printResolved(resolver, pkg, resolved, verbosity, System.out);
 		}
 	}
 
