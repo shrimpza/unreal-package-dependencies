@@ -58,7 +58,7 @@ public class Main {
 			UnrealPackage pkg;
 
 			Path p = Paths.get(cli.args()[i]).toAbsolutePath();
-			if (Files.exists(p)) pkg = resolver.findPackage(p);
+			if (Files.exists(p)) pkg = new UnrealPackage(p);
 			else pkg = resolver.findPackage(cli.args()[i]);
 
 			Map<String, Set<Resolved>> resolved = resolver.resolve(pkg);
