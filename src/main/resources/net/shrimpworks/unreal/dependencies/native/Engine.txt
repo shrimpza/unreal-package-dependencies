@@ -11,6 +11,7 @@ CheckSumCommandlet
 Client
 Console
 ControlChannel
+ConvexVolume
 DemoPlayPendingLevel
 DemoRecConnection
 DemoRecDriver
@@ -42,7 +43,10 @@ RenderIterator
 ScriptedTexture
 ServerCommandlet
 SkeletalMesh
+StaticMesh
+StaticMeshInstance
 Sound
+TerrainSector
 Texture
 Vectors
 Verts

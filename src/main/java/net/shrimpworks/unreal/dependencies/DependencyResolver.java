@@ -19,7 +19,7 @@ import net.shrimpworks.unreal.packages.entities.Import;
 public class DependencyResolver {
 
 	// known file types of unreal packages
-	private static final Set<String> FILE_TYPES = Set.of("u", "unr", "utx", "uax", "umx");
+	private static final Set<String> FILE_TYPES = Set.of("u", "unr", "utx", "uax", "umx", "usx");
 
 	public final Path rootPath;
 	public final Map<String, Set<UnrealPackage>> knownPackages;

@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'net.shrimpworks'
-version = "1.0.1"
+version = "1.0.2"
 
 mainClassName = 'net.shrimpworks.unreal.dependencies.Main'
 
@@ -45,7 +45,7 @@ publishing {
 }
 
 dependencies {
-    implementation 'net.shrimpworks:unreal-package-lib:1.4.47'
+    implementation 'net.shrimpworks:unreal-package-lib:1.5.50'
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.4.2'
 }

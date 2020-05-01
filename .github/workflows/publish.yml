@@ -18,7 +18,7 @@ jobs:
         env:
           ARTEFACTS_USER: ${{ secrets.ARTEFACTS_USER }}
           ARTEFACTS_PASSWORD: ${{ secrets.ARTEFACTS_PASSWORD }}
-          CI_BUILD: 1.0.1
+          CI_BUILD: 1.0.2
         run: |
           ./gradlew publish execJar
           ./etc/publish.sh https://code.shrimpworks.za.net/artefacts/package-dependency ./build/libs/package-dependency ./build/libs/package-dependency-exec.jar
