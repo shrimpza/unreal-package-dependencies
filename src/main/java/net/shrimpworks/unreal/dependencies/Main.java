@@ -50,8 +50,8 @@ public class Main {
 		final Verbosity verbosity = Verbosity.valueOf(cli.option("show", "all").toUpperCase());
 
 		Path searchPath = Paths.get(cli.args()[0]).toAbsolutePath();
-		NativePackages nativePackages = new NativePackages();
-		DependencyResolver resolver = new DependencyResolver(searchPath, nativePackages);
+
+		DependencyResolver resolver = new DependencyResolver(searchPath);
 
 		boolean ok = true;
 		for (int i = 1; i < cli.args().length; i++) {
@@ -62,7 +62,7 @@ public class Main {
 			else pkg = resolver.findPackage(cli.args()[i]);
 
 			Map<String, Set<Resolved>> resolved = resolver.resolve(pkg);
-			printResolved(resolver, pkg, resolved, verbosity, System.out);
+			printResolved(pkg, resolved, verbosity, System.out);
 
 			ok = ok && resolved.values().stream().flatMap(Set::stream).allMatch(Resolved::resolved)
 				 && resolved.entrySet().stream().noneMatch(e -> e.getValue().isEmpty());
@@ -78,14 +78,12 @@ public class Main {
 	 * Prints the results of a dependency resolution check, with varying levels
 	 * of output depending on the specified {@link Verbosity}.
 	 *
-	 * @param resolver  dependency resolver instance
 	 * @param pkg       the package which was checked
 	 * @param resolved  resolution output from {@link DependencyResolver#resolve(UnrealPackage)}
 	 * @param verbosity amount of information to output, see {@link Verbosity}
 	 * @param out       output stream to write to
 	 */
-	private static void printResolved(DependencyResolver resolver, UnrealPackage pkg, Map<String, Set<Resolved>> resolved,
-									  Verbosity verbosity, PrintStream out) {
+	private static void printResolved(UnrealPackage pkg, Map<String, Set<Resolved>> resolved, Verbosity verbosity, PrintStream out) {
 		String fileResolved = resolved.values().stream().flatMap(Set::stream).allMatch(Resolved::resolved)
 							  && resolved.entrySet().stream().noneMatch(e -> e.getValue().isEmpty()) ? OK : BAD;
 		out.printf("%s %s%n", fileResolved, pkg.name);

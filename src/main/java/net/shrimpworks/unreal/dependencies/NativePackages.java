@@ -24,6 +24,8 @@ public class NativePackages {
 
 	private final Map<String, NativePackage> packages;
 
+	public static final NativePackages DEFAULT = new NativePackages();
+
 	public NativePackages() {
 		this.packages = new HashMap<>();
 		for (String pkg : PACKAGES) {

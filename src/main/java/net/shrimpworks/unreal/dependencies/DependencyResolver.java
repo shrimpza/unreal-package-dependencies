@@ -26,6 +26,10 @@ public class DependencyResolver {
 	private final Map<String, Set<UnrealPackage>> lowerNames;
 	private final NativePackages nativePackages;
 
+	public DependencyResolver(Path rootPath) throws IOException {
+		this(rootPath, NativePackages.DEFAULT);
+	}
+
 	public DependencyResolver(Path rootPath, NativePackages nativePackages) throws IOException {
 		this.rootPath = rootPath;
 		this.nativePackages = nativePackages;
