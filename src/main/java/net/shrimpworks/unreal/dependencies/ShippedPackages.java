@@ -534,7 +534,7 @@ public class ShippedPackages {
 			"xutfx"
 	);
 
-	public static final Set<String> UnrealTournament2004 = Set.of(
+	private static final Set<String> UnrealTournament2004 = Set.of(
 			"AS-BP2-Acatana",
 			"AS-BP2-Jumpship",
 			"AS-BP2-Outback",
