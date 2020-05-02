@@ -120,7 +120,7 @@ public class Main {
 			}
 
 			r.children.stream().sorted(Comparator.comparing(child -> child.imported.name)).forEach(child -> {
-				boolean childResolved = r.resolved();
+				boolean childResolved = child.resolved();
 				if (!missingOnly || !childResolved) {
 					sb.append(String.format("%s %s%s: %s%n", childResolved ? OK : BAD,
 											childPad, child.imported.name.name, child.imported.className.name));
