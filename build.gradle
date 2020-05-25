@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'net.shrimpworks'
-version = "1.0.5"
+version = "1.0.6"
 
 mainClassName = 'net.shrimpworks.unreal.dependencies.Main'
 
@@ -62,17 +62,17 @@ jar {
 
 task execJar(type: Jar) {
     archiveClassifier = "exec"
-    archiveName = "${baseName}-${classifier}.${extension}"
+    archiveFileName = "${archiveBaseName.get()}-${archiveClassifier.get()}.${archiveExtension.get()}"
     from sourceSets.main.output
 
     dependsOn configurations.runtimeClasspath
 
     manifest {
         attributes (
-                'Implementation-Title': project.name,
-                'Implementation-Version': project.version,
-                'Main-Class': mainClassName,
-                'Class-Path': configurations.runtimeClasspath.files.collect { it.getName() }.join(' ')
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+            'Main-Class': mainClassName,
+            'Class-Path': configurations.runtimeClasspath.files.collect { it.getName() }.join(' ')
         )
     }
 
@@ -86,10 +86,10 @@ task execJar(type: Jar) {
         doLast {
             project.exec {
                 commandLine(
-                        "$projectDir/etc/build-launcher.sh",
-                        "$projectDir/etc/launcher.sh",
-                        "$destinationDir/$archiveName",
-                        "$destinationDir/$baseName")
+                    "$projectDir/etc/build-launcher.sh",
+                    "$projectDir/etc/launcher.sh",
+                    "${destinationDirectory.get()}/${archiveFileName.get()}",
+                    "${destinationDirectory.get()}/${archiveBaseName.get()}")
             }
         }
     }
