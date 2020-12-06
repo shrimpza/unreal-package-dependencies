@@ -7,24 +7,29 @@ import net.shrimpworks.unreal.packages.Package;
 
 public class UnrealPackage {
 
-	public final Path path;
 	public final String name;
 	public final Package pkg;
 
 	public UnrealPackage(Path path) throws IOException {
-		this.path = path;
-		this.name = plainName(path);
-		this.pkg = new Package(path);
+		this(plainName(path), new Package(path));
 	}
 
-	private static String plainName(Path path) {
-		String tmp = path.toString().replaceAll("\\\\", "/");
-		tmp = tmp.substring(Math.max(0, tmp.lastIndexOf("/") + 1));
+	public UnrealPackage(String name, Package pkg) {
+		this.name = name;
+		this.pkg = pkg;
+	}
+
+	static String plainName(Path path) {
+		return plainName(path.toString());
+	}
+
+	static String plainName(String path) {
+		String tmp = path.replaceAll("\\\\", "/").substring(Math.max(0, path.lastIndexOf("/") + 1));
 		return tmp.substring(0, tmp.lastIndexOf(".")).replaceAll("/", "").trim().replaceAll("[^\\x20-\\x7E]", "");
 	}
 
 	@Override
 	public String toString() {
-		return String.format("UnrealPackage [path=%s, name=%s, pkg=%s]", path, name, pkg);
+		return String.format("UnrealPackage [name=%s, pkg=%s]", name, pkg);
 	}
 }

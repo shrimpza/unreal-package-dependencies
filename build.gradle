@@ -1,106 +1,111 @@
 import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
-    id 'java'
-    id 'application'
-    id 'maven-publish'
-    id 'jacoco'
+	id 'java'
+	id 'application'
+	id 'maven-publish'
+	id 'jacoco'
 }
 
 group = 'net.shrimpworks'
-version = "1.0.6"
+version = "1.1"
 
 mainClassName = 'net.shrimpworks.unreal.dependencies.Main'
 
-sourceCompatibility = '11'
-targetCompatibility = '11'
+compileJava {
+	options.release = 11
+}
+
+if (System.getenv().containsKey("DRONE_BUILD_NUMBER")) {
+	version = "${version}.${System.env.DRONE_BUILD_NUMBER}"
+}
 
 repositories {
-    mavenLocal()
-    mavenCentral()
-    maven {
-        url "https://code.shrimpworks.za.net/artefacts"
-    }
+	mavenLocal()
+	mavenCentral()
+	maven {
+		url "https://code.shrimpworks.za.net/artefacts"
+	}
 }
 
 publishing {
-    repositories {
-        maven {
-            name = "ShrimpWorks"
-            url = 'https://code.shrimpworks.za.net/artefacts/'
-            authentication {
-                basic(BasicAuthentication)
-            }
-            credentials(PasswordCredentials) {
-                username = "${System.env.ARTEFACTS_USER}"
-                password = "${System.env.ARTEFACTS_PASSWORD}"
-            }
-        }
-    }
-    publications {
-        maven(MavenPublication) {
-            from components.java
-        }
-    }
+	repositories {
+		maven {
+			name = "ShrimpWorks"
+			url = 'https://code.shrimpworks.za.net/artefacts/'
+			authentication {
+				basic(BasicAuthentication)
+			}
+			credentials(PasswordCredentials) {
+				username = "${System.env.ARTEFACTS_USER}"
+				password = "${System.env.ARTEFACTS_PASSWORD}"
+			}
+		}
+	}
+	publications {
+		maven(MavenPublication) {
+			from components.java
+		}
+	}
 }
 
 dependencies {
-    implementation 'net.shrimpworks:unreal-package-lib:1.5.50'
+	implementation 'net.shrimpworks:unreal-package-lib:1.5.50'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.4.2'
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.4.2'
 }
 
 jar {
-    manifest {
-        attributes(
-                'Implementation-Title': project.name,
-                'Implementation-Version': project.version,
-                'Main-Class': mainClassName,
-        )
-    }
+	manifest {
+		attributes(
+				'Implementation-Title': project.name,
+				'Implementation-Version': project.version,
+				'Main-Class': mainClassName,
+		)
+	}
 }
 
 task execJar(type: Jar) {
-    archiveClassifier = "exec"
-    archiveFileName = "${archiveBaseName.get()}-${archiveClassifier.get()}.${archiveExtension.get()}"
-    from sourceSets.main.output
+	archiveClassifier = "exec"
+	archiveFileName = "${archiveBaseName.get()}-${archiveClassifier.get()}.${archiveExtension.get()}"
+	from sourceSets.main.output
 
-    dependsOn configurations.runtimeClasspath
+	dependsOn configurations.runtimeClasspath
 
-    manifest {
-        attributes (
-            'Implementation-Title': project.name,
-            'Implementation-Version': project.version,
-            'Main-Class': mainClassName,
-            'Class-Path': configurations.runtimeClasspath.files.collect { it.getName() }.join(' ')
-        )
-    }
+	manifest {
+		attributes(
+				'Implementation-Title': project.name,
+				'Implementation-Version': project.version,
+				'Main-Class': mainClassName,
+				'Class-Path': configurations.runtimeClasspath.files.collect { it.getName() }.join(' ')
+		)
+	}
 
-    // build the fat executable jar file
-    from {
-        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
-    }
+	// build the fat executable jar file
+	from {
+		configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+	}
 
-    // run the script which builds the executable
-    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-        doLast {
-            project.exec {
-                commandLine(
-                    "$projectDir/etc/build-launcher.sh",
-                    "$projectDir/etc/launcher.sh",
-                    "${destinationDirectory.get()}/${archiveFileName.get()}",
-                    "${destinationDirectory.get()}/${archiveBaseName.get()}")
-            }
-        }
-    }
+	// run the script which builds the executable
+	if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+		doLast {
+			project.exec {
+				commandLine(
+						"$projectDir/etc/build-launcher.sh",
+						"$projectDir/etc/launcher.sh",
+						"${destinationDirectory.get()}/${archiveFileName.get()}",
+						"${destinationDirectory.get()}/${archiveBaseName.get()}")
+			}
+		}
+	}
 }
 
 test {
-    useJUnitPlatform()
+	useJUnitPlatform()
 }
 
 jacocoTestReport {
-    reports {
-        xml.enabled = true
-    }
+	reports {
+		xml.enabled = true
+	}
 }

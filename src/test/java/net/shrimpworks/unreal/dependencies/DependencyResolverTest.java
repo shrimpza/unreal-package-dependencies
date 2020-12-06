@@ -42,7 +42,6 @@ public class DependencyResolverTest {
 	@Test
 	public void loadPackages() throws IOException {
 		DependencyResolver resolver = new DependencyResolver(unrMap.getParent(), new NativePackages());
-		assertNotNull(resolver.findPackage(unrMap));
 		assertNotNull(resolver.findPackage("SCR-CityStreet"));
 	}
 

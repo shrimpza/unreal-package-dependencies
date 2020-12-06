@@ -13,6 +13,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import net.shrimpworks.unreal.packages.Package;
+import net.shrimpworks.unreal.packages.PackageReader;
+import net.shrimpworks.unreal.packages.Umod;
 import net.shrimpworks.unreal.packages.entities.Export;
 import net.shrimpworks.unreal.packages.entities.Import;
 
@@ -20,6 +23,7 @@ public class DependencyResolver {
 
 	// known file types of unreal packages
 	private static final Set<String> FILE_TYPES = Set.of("u", "unr", "utx", "uax", "umx", "usx", "ut2");
+	private static final Set<String> UMODS = Set.of("umod", "ut2mod", "ut4mod");
 
 	public final Path rootPath;
 	public final Map<String, Set<UnrealPackage>> knownPackages;
@@ -43,6 +47,13 @@ public class DependencyResolver {
 				if (FILE_TYPES.contains(ext)) {
 					UnrealPackage pkg = new UnrealPackage(file);
 					knownPackages.computeIfAbsent(pkg.name, n -> new HashSet<>()).add(pkg);
+				} else if (UMODS.contains(ext)) {
+					Umod umod = new Umod(file);
+					for (Umod.UmodFile umodFile : umod.files) {
+						UnrealPackage pkg = new UnrealPackage(UnrealPackage.plainName(umodFile.name),
+															  new Package(new PackageReader(umodFile.read())));
+						knownPackages.computeIfAbsent(pkg.name, n -> new HashSet<>()).add(pkg);
+					}
 				}
 				return super.visitFile(file, attrs);
 			}
@@ -62,18 +73,6 @@ public class DependencyResolver {
 	public UnrealPackage findPackage(String pkgName) {
 		return lowerNames.get(pkgName.toLowerCase()).stream().findFirst()
 						 .orElseThrow(() -> new NoSuchElementException("Could not find package with name " + pkgName));
-	}
-
-	/**
-	 * Find a package by file name.
-	 *
-	 * @param path path to package file
-	 * @return found package
-	 * @throws NoSuchElementException the package could not be found
-	 */
-	public UnrealPackage findPackage(Path path) {
-		return knownPackages.values().stream().flatMap(Set::stream).filter(p -> p.path.equals(path)).findFirst()
-							.orElseThrow(() -> new NoSuchElementException("Could not find package for path " + path.toString()));
 	}
 
 	/**

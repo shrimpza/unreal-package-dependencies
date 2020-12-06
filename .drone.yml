@@ -1,0 +1,9 @@
+kind: pipeline
+name: default
+type: docker
+
+steps:
+  - name: test
+    image: gradle:6.7.1-jdk11
+    commands:
+      - ./gradlew test
