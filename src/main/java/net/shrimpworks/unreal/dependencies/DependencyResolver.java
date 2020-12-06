@@ -50,9 +50,12 @@ public class DependencyResolver {
 				} else if (UMODS.contains(ext)) {
 					Umod umod = new Umod(file);
 					for (Umod.UmodFile umodFile : umod.files) {
-						UnrealPackage pkg = new UnrealPackage(UnrealPackage.plainName(umodFile.name),
-															  new Package(new PackageReader(umodFile.read())));
-						knownPackages.computeIfAbsent(pkg.name, n -> new HashSet<>()).add(pkg);
+						String umExt = extension(umodFile.name).toLowerCase();
+						if (FILE_TYPES.contains(umExt)) {
+							UnrealPackage pkg = new UnrealPackage(UnrealPackage.plainName(umodFile.name),
+																  new Package(new PackageReader(umodFile.read())));
+							knownPackages.computeIfAbsent(pkg.name, n -> new HashSet<>()).add(pkg);
+						}
 					}
 				}
 				return super.visitFile(file, attrs);
@@ -150,7 +153,10 @@ public class DependencyResolver {
 	}
 
 	private static String extension(Path path) {
-		String pathString = path.toString();
+		return extension(path.toString());
+	}
+
+	private static String extension(String pathString) {
 		return pathString.substring(pathString.lastIndexOf(".") + 1);
 	}
 }

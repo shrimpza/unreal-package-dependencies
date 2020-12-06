@@ -24,7 +24,8 @@ public class UnrealPackage {
 	}
 
 	static String plainName(String path) {
-		String tmp = path.replaceAll("\\\\", "/").substring(Math.max(0, path.lastIndexOf("/") + 1));
+		String tmp = path.replaceAll("\\\\", "/");
+		tmp = tmp.substring(Math.max(0, tmp.lastIndexOf("/") + 1));
 		return tmp.substring(0, tmp.lastIndexOf(".")).replaceAll("/", "").trim().replaceAll("[^\\x20-\\x7E]", "");
 	}
 

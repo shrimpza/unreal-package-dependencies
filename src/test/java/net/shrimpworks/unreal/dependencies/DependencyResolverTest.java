@@ -52,4 +52,22 @@ public class DependencyResolverTest {
 		assertFalse(resolve.get("SoccerScores").isEmpty());
 		assertFalse(resolve.get("SoccerScores").stream().allMatch(Resolved::resolved));
 	}
+
+	@Test
+	public void resolveUmodDependencies() throws IOException {
+		// unpack a test mod to a temporary location
+		Path tmpMod = Files.createTempFile("test-mod-", ".umod");
+		try (InputStream is = getClass().getResourceAsStream("DropStuff.umod.gz");
+			 GZIPInputStream gis = new GZIPInputStream(is)) {
+
+			Files.copy(gis, tmpMod, StandardCopyOption.REPLACE_EXISTING);
+
+			DependencyResolver resolver = new DependencyResolver(tmpMod, new NativePackages());
+
+			Map<String, Set<Resolved>> resolve = resolver.resolve("DropStuff");
+			assertFalse(resolve.get("Botpack").isEmpty());
+		} finally {
+			Files.deleteIfExists(tmpMod);
+		}
+	}
 }
