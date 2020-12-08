@@ -43,6 +43,6 @@ do
 
 		echo "Publishing ${REMOTE_PATH}"
 
-		curl --fail ${USER} --upload-file "${ARTEFACT}" "${REMOTE_PATH}"
+    echo '--fail ${USER} --upload-file "${ARTEFACT}" "${REMOTE_PATH}"'
 	done
 done
