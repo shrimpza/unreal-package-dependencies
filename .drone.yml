@@ -18,3 +18,6 @@ steps:
       - gradle execJar publish
       - "export CI_BUILD=$(gradle properties | grep 'version:' | sed 's/version: //') && \
       ./etc/publish.sh https://code.shrimpworks.za.net/artefacts/package-dependency ./build/libs/package-dependency ./build/libs/package-dependency-exec.jar"
+    when:
+      branch:
+        - master
