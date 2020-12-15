@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'net.shrimpworks'
-version = "1.1"
+version = "1.2"
 
 mainClassName = 'net.shrimpworks.unreal.dependencies.Main'
 
