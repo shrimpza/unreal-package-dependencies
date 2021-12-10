@@ -44,19 +44,23 @@ public class DependencyResolver {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				String ext = extension(file).toLowerCase();
-				if (FILE_TYPES.contains(ext)) {
-					UnrealPackage pkg = new UnrealPackage(file);
-					knownPackages.computeIfAbsent(pkg.name, n -> new HashSet<>()).add(pkg);
-				} else if (UMODS.contains(ext)) {
-					Umod umod = new Umod(file);
-					for (Umod.UmodFile umodFile : umod.files) {
-						String umExt = extension(umodFile.name).toLowerCase();
-						if (FILE_TYPES.contains(umExt)) {
-							UnrealPackage pkg = new UnrealPackage(UnrealPackage.plainName(umodFile.name),
-																  new Package(new PackageReader(umodFile.read())));
-							knownPackages.computeIfAbsent(pkg.name, n -> new HashSet<>()).add(pkg);
+				try {
+					if (FILE_TYPES.contains(ext)) {
+						UnrealPackage pkg = new UnrealPackage(file);
+						knownPackages.computeIfAbsent(pkg.name, n -> new HashSet<>()).add(pkg);
+					} else if (UMODS.contains(ext)) {
+						Umod umod = new Umod(file);
+						for (Umod.UmodFile umodFile : umod.files) {
+							String umExt = extension(umodFile.name).toLowerCase();
+							if (FILE_TYPES.contains(umExt)) {
+								UnrealPackage pkg = new UnrealPackage(UnrealPackage.plainName(umodFile.name),
+																	  new Package(new PackageReader(umodFile.read())));
+								knownPackages.computeIfAbsent(pkg.name, n -> new HashSet<>()).add(pkg);
+							}
 						}
 					}
+				} catch (Exception e) {
+					throw new IOException(String.format("Failed to read file %s: %s", file, e.getMessage()), e);
 				}
 				return super.visitFile(file, attrs);
 			}
