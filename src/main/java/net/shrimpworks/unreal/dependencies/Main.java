@@ -51,7 +51,7 @@ public class Main {
 
 		Path searchPath = Paths.get(cli.args()[0]).toAbsolutePath();
 
-		DependencyResolver resolver = new DependencyResolver(searchPath);
+		DependencyResolver resolver = new DependencyResolver(searchPath, NativePackages.DEFAULT, e -> System.err.println(e.getMessage()));
 
 		boolean ok = true;
 		for (int i = 1; i < cli.args().length; i++) {

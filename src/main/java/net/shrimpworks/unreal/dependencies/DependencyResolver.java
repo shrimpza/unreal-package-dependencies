@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import net.shrimpworks.unreal.packages.Package;
 import net.shrimpworks.unreal.packages.PackageReader;
@@ -34,7 +35,14 @@ public class DependencyResolver {
 		this(rootPath, NativePackages.DEFAULT);
 	}
 
-	public DependencyResolver(Path rootPath, NativePackages nativePackages) throws IOException {
+	public DependencyResolver(Path rootPath, NativePackages nativePackages) throws IOException, ResolutionException {
+		this(rootPath, NativePackages.DEFAULT, e -> {
+			throw e;
+		});
+	}
+
+	public DependencyResolver(Path rootPath, NativePackages nativePackages, Consumer<ResolutionException> exceptionHandler)
+		throws IOException, ResolutionException {
 		this.rootPath = rootPath;
 		this.nativePackages = nativePackages;
 		this.knownPackages = new HashMap<>();
@@ -60,7 +68,9 @@ public class DependencyResolver {
 						}
 					}
 				} catch (Exception e) {
-					throw new IOException(String.format("Failed to read file %s: %s", file, e.getMessage()), e);
+					exceptionHandler.accept(
+						new ResolutionException(file, String.format("Failed to read file %s: %s", file, e), e)
+					);
 				}
 				return super.visitFile(file, attrs);
 			}
@@ -115,19 +125,19 @@ public class DependencyResolver {
 						   .sorted((a, b) -> a.children().isEmpty() ? 1 : -1) // prefer exports with children, they have stuff to import
 						   .findFirst()
 						   .ifPresentOrElse(
-								   found -> candidates.add(resolve(i, found)),
-								   () -> {
-									   // no regular exports found, maybe we can find a native export
-									   NativePackages.NativePackage nativePackage = nativePackages.get(rootImport.name.name);
-									   if (nativePackage != null && nativePackage.contains(i.name.name)) {
-										   candidates.add(new Resolved(i, Resolved.ResolvedTarget.nativeClass(nativePackage.name,
-																											  i.name.name),
-																	   Collections.emptySet()));
-									   } else {
-										   // we didn't find a sub-package or export we were looking for, so add the rest of the imports
-										   candidates.add(resolve(i, null));
-									   }
-								   });
+							   found -> candidates.add(resolve(i, found)),
+							   () -> {
+								   // no regular exports found, maybe we can find a native export
+								   NativePackages.NativePackage nativePackage = nativePackages.get(rootImport.name.name);
+								   if (nativePackage != null && nativePackage.contains(i.name.name)) {
+									   candidates.add(new Resolved(i, Resolved.ResolvedTarget.nativeClass(nativePackage.name,
+																										  i.name.name),
+																   Collections.emptySet()));
+								   } else {
+									   // we didn't find a sub-package or export we were looking for, so add the rest of the imports
+									   candidates.add(resolve(i, null));
+								   }
+							   });
 				}
 			}
 			importPackages.put(rootImport.name.name, candidates);
@@ -162,5 +172,15 @@ public class DependencyResolver {
 
 	private static String extension(String pathString) {
 		return pathString.substring(pathString.lastIndexOf(".") + 1);
+	}
+
+	public static class ResolutionException extends RuntimeException {
+
+		public final Path file;
+
+		public ResolutionException(Path file, String message, Throwable cause) {
+			super(message, cause);
+			this.file = file;
+		}
 	}
 }
