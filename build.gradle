@@ -50,7 +50,7 @@ publishing {
 }
 
 dependencies {
-	implementation 'net.shrimpworks:unreal-package-lib:1.8.14'
+	implementation 'net.shrimpworks:unreal-package-lib:1.8.15'
 
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 }

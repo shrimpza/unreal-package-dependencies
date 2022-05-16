@@ -38,6 +38,7 @@ public class ShippedPackages {
 	public static final ShippedPackages UNREAL_GOLD = new ShippedPackages("UnrealGold");
 	public static final ShippedPackages UNREAL_TOURNAMENT = new ShippedPackages("UnrealTournament");
 	public static final ShippedPackages UNREAL_TOURNAMENT_2004 = new ShippedPackages("UnrealTournament2004");
+	public static final ShippedPackages UNREAL_TOURNAMENT_3 = new ShippedPackages("UnrealTournament3");
 
 	private static Set<String> loadPackages(String gameName) {
 		Set<String> packageNames = new HashSet<>();
