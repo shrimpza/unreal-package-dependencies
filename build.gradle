@@ -50,9 +50,9 @@ publishing {
 }
 
 dependencies {
-	implementation 'net.shrimpworks:unreal-package-lib:1.8.16'
+	implementation 'net.shrimpworks:unreal-package-lib:1.9.20'
 
-	testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.9.0'
 }
 
 jar {
