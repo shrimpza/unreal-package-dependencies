@@ -13,7 +13,7 @@ version = "1.3"
 mainClassName = 'net.shrimpworks.unreal.dependencies.Main'
 
 compileJava {
-	options.release = 11
+	options.release = 17
 }
 
 if (System.getenv().containsKey("DRONE_BUILD_NUMBER")) {
