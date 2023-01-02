@@ -76,6 +76,8 @@ task execJar(type: Jar) {
 
 	dependsOn configurations.runtimeClasspath
 
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
 	manifest {
 		attributes(
 				'Implementation-Title': project.name,
