@@ -120,10 +120,10 @@ public class DependencyResolver {
 				if (candidatePackages.isEmpty()) candidates.add(resolve(i, null));
 
 				for (UnrealPackage pkg : candidatePackages) {
+					// prefer exports with children, they have stuff to import
 					pkg.pkg.rootExports().stream()
 						   .filter(e -> e.name.name.equalsIgnoreCase(i.name.name))
-						   .sorted((a, b) -> a.children().isEmpty() ? 1 : -1) // prefer exports with children, they have stuff to import
-						   .findFirst()
+						   .min((a, b) -> a.children().isEmpty() ? 1 : -1)
 						   .ifPresentOrElse(
 							   found -> candidates.add(resolve(i, found)),
 							   () -> {
