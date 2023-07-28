@@ -9,6 +9,9 @@ plugins {
 
 group = 'net.shrimpworks'
 version = "1.4"
+if (System.getenv().containsKey("BUILD_NUMBER")) {
+	version += ".${System.env.BUILD_NUMBER}"
+} else version += ".DEV"
 
 mainClassName = 'net.shrimpworks.unreal.dependencies.Main'
 
@@ -18,10 +21,6 @@ application {
 
 compileJava {
 	options.release = 17
-}
-
-if (System.getenv().containsKey("DRONE_BUILD_NUMBER")) {
-	version = "${version}.${System.env.DRONE_BUILD_NUMBER}"
 }
 
 repositories {
@@ -56,7 +55,7 @@ publishing {
 dependencies {
 	implementation 'net.shrimpworks:unreal-package-lib:1.10.24'
 
-	testImplementation 'org.junit.jupiter:junit-jupiter:5.9.0'
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
 }
 
 jar {
