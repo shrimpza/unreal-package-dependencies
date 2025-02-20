@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'net.shrimpworks'
-version = "1.5"
+version = "1.6"
 if (System.getenv().containsKey("BUILD_NUMBER")) {
 	version += ".${System.env.BUILD_NUMBER}"
 } else version += ".DEV"
@@ -20,7 +20,7 @@ application {
 }
 
 compileJava {
-	options.release = 17
+	options.release = 21
 }
 
 repositories {
@@ -53,9 +53,9 @@ publishing {
 }
 
 dependencies {
-	implementation 'net.shrimpworks:unreal-package-lib:1.12.26'
+	implementation 'net.shrimpworks:unreal-package-lib:1.13.28'
 
-	testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
 }
 
 jar {
