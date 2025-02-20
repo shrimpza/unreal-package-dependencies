@@ -13,7 +13,7 @@ requirements, typically for server administrators, or players who just want to
 make sure their maps are all clean and in working order.
 
 *Requirements:*
-- Java 11 (OpenJDK, Zulu, Oracle, etc)
+- Java 21 (OpenJDK, Zulu, Oracle, etc)
 
 
 ## Building
