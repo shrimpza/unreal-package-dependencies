@@ -57,13 +57,14 @@ public class DependencyResolver {
 						UnrealPackage pkg = new UnrealPackage(file);
 						knownPackages.computeIfAbsent(pkg.name, n -> new HashSet<>()).add(pkg);
 					} else if (UMODS.contains(ext)) {
-						Umod umod = new Umod(file);
-						for (Umod.UmodFile umodFile : umod.files) {
-							String umExt = extension(umodFile.name).toLowerCase();
-							if (FILE_TYPES.contains(umExt)) {
-								UnrealPackage pkg = new UnrealPackage(UnrealPackage.plainName(umodFile.name),
-																	  new Package(new PackageReader(umodFile.read())));
-								knownPackages.computeIfAbsent(pkg.name, n -> new HashSet<>()).add(pkg);
+						try (Umod umod = new Umod(file)) {
+							for (Umod.UmodFile umodFile : umod.files) {
+								String umExt = extension(umodFile.name).toLowerCase();
+								if (FILE_TYPES.contains(umExt)) {
+									UnrealPackage pkg = new UnrealPackage(UnrealPackage.plainName(umodFile.name),
+																		  new Package(new PackageReader(umodFile.read())));
+									knownPackages.computeIfAbsent(pkg.name, n -> new HashSet<>()).add(pkg);
+								}
 							}
 						}
 					}

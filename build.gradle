@@ -53,9 +53,10 @@ publishing {
 }
 
 dependencies {
-	implementation 'net.shrimpworks:unreal-package-lib:1.13.28'
+	implementation('net.shrimpworks:unreal-package-lib:1.13.29')
 
-	testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+	testImplementation('org.junit.jupiter:junit-jupiter:5.13.2')
+	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }
 
 jar {
