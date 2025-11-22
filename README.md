@@ -19,20 +19,18 @@ make sure their maps are all clean and in working order.
 ## Building
 
 The project is built with Gradle. The provided `gradlew` wrapper may be 
-invoked as follows to produce an executable Jar file:
+invoked as follows to produce a Jar file:
 
 ### On Linux
 
 ```
-./gradlew execJar
+./gradlew jar
 ```
 
 To run, execute:
 
 ```
-./build/libs/package-dependencies
-# - or via java -
-java -jar build/libs/package-dependencies-exec.jar
+java -jar ./build/libs/package-dependency-{version}.jar
 ```
 
 ### On Windows
@@ -44,7 +42,7 @@ gradlew.bat execJar
 To run, execute:
 
 ```
-java -jar build\libs\unreal-archive-exec.jar
+java -jar build\libs\package-dependency-{version}.jar
 ```
 
 

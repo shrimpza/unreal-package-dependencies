@@ -1,5 +1,3 @@
-import org.apache.tools.ant.taskdefs.condition.Os
-
 plugins {
 	id 'java'
 	id 'application'
@@ -8,14 +6,13 @@ plugins {
 }
 
 group = 'net.shrimpworks'
-version = "1.6"
+version = "1.7"
 if (System.getenv().containsKey("BUILD_NUMBER")) {
 	version += ".${System.env.BUILD_NUMBER}"
 } else version += ".DEV"
 
-mainClassName = 'net.shrimpworks.unreal.dependencies.Main'
-
 application {
+	mainClass = 'net.shrimpworks.unreal.dependencies.Main'
 	mainModule = 'shrimpworks.unreal.dependencies'
 }
 
@@ -53,9 +50,9 @@ publishing {
 }
 
 dependencies {
-	implementation('net.shrimpworks:unreal-package-lib:1.13.29')
+	implementation('net.shrimpworks:unreal-package-lib:1.14.30')
 
-	testImplementation('org.junit.jupiter:junit-jupiter:5.13.2')
+	testImplementation('org.junit.jupiter:junit-jupiter:5.14.1')
 	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }
 
@@ -64,45 +61,8 @@ jar {
 		attributes(
 				'Implementation-Title': project.name,
 				'Implementation-Version': project.version,
-				'Main-Class': mainClassName,
+				'Main-Class': application.mainClass,
 		)
-	}
-}
-
-task execJar(type: Jar) {
-	archiveClassifier = "exec"
-	archiveFileName = "${archiveBaseName.get()}-${archiveClassifier.get()}.${archiveExtension.get()}"
-	from sourceSets.main.output
-
-	dependsOn configurations.runtimeClasspath
-
-	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-	manifest {
-		attributes(
-				'Implementation-Title': project.name,
-				'Implementation-Version': project.version,
-				'Main-Class': mainClassName,
-				'Class-Path': configurations.runtimeClasspath.files.collect { it.getName() }.join(' ')
-		)
-	}
-
-	// build the fat executable jar file
-	from {
-		configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
-	}
-
-	// run the script which builds the executable
-	if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-		doLast {
-			project.exec {
-				commandLine(
-						"$projectDir/etc/build-launcher.sh",
-						"$projectDir/etc/launcher.sh",
-						"${destinationDirectory.get()}/${archiveFileName.get()}",
-						"${destinationDirectory.get()}/${archiveBaseName.get()}")
-			}
-		}
 	}
 }
 
